@@ -1,4 +1,5 @@
 ﻿using Plugin.Connectivity;
+using Plugin.Connectivity.Abstractions;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -10,12 +11,22 @@ namespace BookList2020
         public App()
         {
             InitializeComponent();
-            MainPage = CrossConnectivity.Current.IsConnected ? new BookList() : (Page)new NoNetworkPage();
+            MainPage = new BookList();
         }
 
         protected override void OnStart()
         {
+            base.OnStart();
+            CrossConnectivity.Current.ConnectivityChanged += HandleConnectivityChanged;
         }
+        void HandleConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            if (!CrossConnectivity.Current.IsConnected)
+            {
+                MainPage.DisplayAlert("ALARM", "Du har simpelthen ingen net #poorfag få net asap.", "Okay boss");
+            }
+        }
+
 
         protected override void OnSleep()
         {

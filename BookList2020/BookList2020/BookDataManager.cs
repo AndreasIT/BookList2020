@@ -15,38 +15,23 @@ namespace BookList2020
 
         public BookDataManager()
         {
-            var login = new Login
-            {
-                Identifier = "mdam@ucl.dk",
-                Password = "Student1234"
-            };
             _client = new HttpClient(new ErrorHandler(new HttpClientHandler()))
             {
                 BaseAddress = new Uri("https://shrouded-waters-99136.herokuapp.com/")
             };
-            var userToken = GetToken(login).Result;
-            var authHeader = new AuthenticationHeaderValue("Bearer", userToken.jwt);
-            _client.DefaultRequestHeaders.Authorization = authHeader;
-        }
-
-        private async Task<ApiToken> GetToken(Login login)
-        {
-            var loginString = JsonConvert.SerializeObject(login);
-            var response = await _client.PostAsync("auth/local", new StringContent(loginString));
-            return JsonConvert.DeserializeObject<ApiToken>(await response.Content.ReadAsStringAsync());
-
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task<IEnumerable<Book>> GetBooks()
         {
-            var response = await _client.GetAsync("books");
-            return JsonConvert.DeserializeObject<IEnumerable<Book>>(await response.Content.ReadAsStringAsync());
-        }
+            var response = await _client.GetStringAsync("books");
+            return JsonConvert.DeserializeObject<IEnumerable<Book>>(response);
+         }
 
         public async Task CreateBook(Book book)
         {
             var request = JsonConvert.SerializeObject(book); 
-            await _client.PostAsync("books", new StringContent(request));
+            await _client.PostAsync("books", new StringContent(request, Encoding.UTF8, "application/json"));
         }
 
         public async Task PutBook(int id, Book book)
@@ -63,29 +48,60 @@ namespace BookList2020
 
     public class ErrorHandler : DelegatingHandler
     {
-        public ErrorHandler(HttpMessageHandler handler) : base(handler) { }
+        private AuthenticationHeaderValue _authHeader;
+        private Login _login;
+
+        public ErrorHandler(HttpMessageHandler handler) : base(handler) 
+        {
+            _login = new Login
+            {
+                Identifier = "mdam@ucl.dk",
+                Password = "Student1234"
+            };
+        }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            await SetupAuthentication(request, cancellationToken);
+            request.Headers.Authorization = _authHeader;
             var response = await base.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
             return response;
+        }
+
+        private async Task SetupAuthentication(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (_authHeader == null)
+            {
+                var tokenRequest = new HttpRequestMessage(HttpMethod.Post,  $"https://{request.RequestUri.Host}/auth/local");
+                var loginContent = JsonConvert.SerializeObject(_login);
+                tokenRequest.Content = new StringContent(loginContent, Encoding.UTF8, "application/json");
+                var response = await base.SendAsync(tokenRequest, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var token = JsonConvert.DeserializeObject<ApiToken>(await response.Content.ReadAsStringAsync());
+                _authHeader = new AuthenticationHeaderValue("Bearer", token.jwt);
+            }
         }
     }
 
     public class Book
     {
-            public int id { get; set; }
-            public string Title { get; set; }
-            public string ISBN { get; set; }
-            public string Description { get; set; }
-            public DateTime created_at { get; set; }
-            public DateTime updated_at { get; set; }
-            public object[] Image { get; set; }
+        public int id { get; set; }
+        public string Title { get; set; }
+        public string ISBN { get; set; }
+        public string Description { get; set; }
+        public object[] Image { get; set; }
+        public Book(string isbn, string title)
+        {
+            ISBN = isbn;
+            Title = title;
+        }
     }
 
     public class Login
     {
+        [JsonProperty("identifier")]
         public string Identifier { get; set; }
+        [JsonProperty("password")]
         public string Password { get; set; }
     }
     public class ApiToken

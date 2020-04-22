@@ -12,15 +12,18 @@
            VerticalOptions="CenterAndExpand">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
+                    <ViewCell Tapped="ViewCell_Tapped">
+                        
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="2*"></RowDefinition>
                                 <RowDefinition Height="*"></RowDefinition>
                             </Grid.RowDefinitions>
-                            <Label x:Name="lbl_title" Text="{Binding Title}" FontSize="Medium" Grid.Row="0"></Label>
-                            <Label x:Name="lbl_isbn" Text="{Binding ISBN}" FontSize="Small" Grid.Row="1"></Label>
+                            <Label x:Name="lbl_title" HorizontalTextAlignment="Center" Text="{Binding Title}" FontSize="Medium" Grid.Row="0"></Label>
+                            <Label x:Name="lbl_isbn"  HorizontalTextAlignment="Center" Text="{Binding ISBN}" FontSize="Small" Grid.Row="1"></Label>
+                      
                         </Grid>
+                        
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
