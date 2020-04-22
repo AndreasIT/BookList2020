@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="BookList2020.BookList">
+    <StackLayout>
+        <!-- Place new controls here -->
+        <ListView x:Name="Books" 
+           HorizontalOptions="Center"
+           VerticalOptions="CenterAndExpand">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="2*"></RowDefinition>
+                                <RowDefinition Height="*"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Label x:Name="lbl_title" Text="{Binding Title}" FontSize="Medium" Grid.Row="0"></Label>
+                            <Label x:Name="lbl_isbn" Text="{Binding ISBN}" FontSize="Small" Grid.Row="1"></Label>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Button x:Name="bt_CreateNewBook" Text="Create" HorizontalOptions="Fill" Clicked="bt_CreateNewBook_Clicked"></Button>
+    </StackLayout>
+
+</ContentPage>
