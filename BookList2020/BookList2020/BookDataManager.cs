@@ -20,7 +20,7 @@ namespace BookList2020
                 Identifier = "mdam@ucl.dk",
                 Password = "Student1234"
             };
-            _client = new HttpClient(new ErrorHandler())
+            _client = new HttpClient(new ErrorHandler(new HttpClientHandler()))
             {
                 BaseAddress = new Uri("https://shrouded-waters-99136.herokuapp.com/")
             };
@@ -63,6 +63,7 @@ namespace BookList2020
 
     public class ErrorHandler : DelegatingHandler
     {
+        public ErrorHandler(HttpMessageHandler handler) : base(handler) { }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var response = await base.SendAsync(request, cancellationToken);
